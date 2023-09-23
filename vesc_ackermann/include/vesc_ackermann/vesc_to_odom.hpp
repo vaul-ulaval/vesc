@@ -56,6 +56,7 @@ private:
   // ROS parameters
   std::string odom_frame_;
   std::string base_frame_;
+  std::string odom_topic_;
   /** State message does not report servo position, so use the command instead */
   bool use_servo_cmd_;
   // conversion gain and offset
