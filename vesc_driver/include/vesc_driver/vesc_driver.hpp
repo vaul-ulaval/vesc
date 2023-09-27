@@ -89,6 +89,8 @@ private:
   CommandLimit speed_limit_;
   CommandLimit position_limit_;
   CommandLimit servo_limit_;
+  std::string imu_frame_;
+  const int GRAVITATIONAL_ACC = 9.80665;
 
   // ROS services
   rclcpp::Publisher<VescStateStamped>::SharedPtr state_pub_;

@@ -67,6 +67,7 @@ VescDriver::VescDriver(const rclcpp::NodeOptions & options)
 {
   // get vesc serial port address
   std::string port = declare_parameter<std::string>("port", "");
+  imu_frame_ = declare_parameter<std::string>("imu_frame", "vesc");
 
   // attempt to connect to the serial port
   try {
@@ -103,8 +104,8 @@ VescDriver::VescDriver(const rclcpp::NodeOptions & options)
   servo_sub_ = create_subscription<Float64>(
     "commands/servo/position", rclcpp::QoS{10}, std::bind(&VescDriver::servoCallback, this, _1));
 
-  // create a 50Hz timer, used for state machine & polling VESC telemetry
-  timer_ = create_wall_timer(20ms, std::bind(&VescDriver::timerCallback, this));
+  // create a 200Hz timer, used for state machine & polling VESC telemetry
+  timer_ = create_wall_timer(10ms, std::bind(&VescDriver::timerCallback, this));
 }
 
 /* TODO or TO-THINKABOUT LIST
@@ -208,7 +209,9 @@ void VescDriver::vescPacketCallback(const std::shared_ptr<VescPacket const> & pa
     auto imu_msg = VescImuStamped();
     auto std_imu_msg = Imu();
     imu_msg.header.stamp = now();
+    imu_msg.header.frame_id = imu_frame_;
     std_imu_msg.header.stamp = now();
+    std_imu_msg.header.frame_id = imu_frame_;
 
     imu_msg.imu.ypr.x = imuData->roll();
     imu_msg.imu.ypr.y = imuData->pitch();
@@ -231,20 +234,27 @@ void VescDriver::vescPacketCallback(const std::shared_ptr<VescPacket const> & pa
     imu_msg.imu.orientation.y = imuData->q_y();
     imu_msg.imu.orientation.z = imuData->q_z();
 
-    std_imu_msg.linear_acceleration.x = imuData->acc_x();
-    std_imu_msg.linear_acceleration.y = imuData->acc_y();
-    std_imu_msg.linear_acceleration.z = imuData->acc_z();
+    std_imu_msg.linear_acceleration.x = imuData->acc_x() * GRAVITATIONAL_ACC;
+    std_imu_msg.linear_acceleration.y = imuData->acc_y() * GRAVITATIONAL_ACC;
+    std_imu_msg.linear_acceleration.z = imuData->acc_z() * GRAVITATIONAL_ACC;
 
-    std_imu_msg.angular_velocity.x = imuData->gyr_x();
-    std_imu_msg.angular_velocity.y = imuData->gyr_y();
-    std_imu_msg.angular_velocity.z = imuData->gyr_z();
+    std_imu_msg.angular_velocity.x = imuData->gyr_x() * (M_PI / 180.0);
+    std_imu_msg.angular_velocity.y = imuData->gyr_y() * (M_PI / 180.0);
+    std_imu_msg.angular_velocity.z = imuData->gyr_z() * (M_PI / 180.0);
 
     std_imu_msg.orientation.w = imuData->q_w();
     std_imu_msg.orientation.x = imuData->q_x();
     std_imu_msg.orientation.y = imuData->q_y();
     std_imu_msg.orientation.z = imuData->q_z();
 
+    std_imu_msg.angular_velocity_covariance[0] = 0.00002;
+    std_imu_msg.angular_velocity_covariance[4] = 0.00002;
+    std_imu_msg.angular_velocity_covariance[8] = 0.00002;
 
+    std_imu_msg.linear_acceleration_covariance[0] = 0.0004;
+    std_imu_msg.linear_acceleration_covariance[4] = 0.0004;
+    std_imu_msg.linear_acceleration_covariance[8] = 0.0004;
+    
     imu_pub_->publish(imu_msg);
     imu_std_pub_->publish(std_imu_msg);
   }
