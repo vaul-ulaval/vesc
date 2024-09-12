@@ -158,9 +158,9 @@ void VescToOdom::vescStateCallback(const VescStateStamped::SharedPtr state)
   odom.twist.twist.angular.z = current_angular_velocity;
 
   // Velocity uncertainty
-  odom.twist.covariance[0] = 0.01;   ///< x 0,04
-  odom.twist.covariance[7] = 0.0;    ///< y
-  odom.twist.covariance[35] = 0.04;  ///< yaw
+  odom.twist.covariance[0] = 0.02;   ///< x
+  odom.twist.covariance[7] = 0.01;   ///< y
+  odom.twist.covariance[35] = 0.09;  ///< yaw
 
   if (publish_tf_) {
     TransformStamped tf;
