@@ -31,8 +31,10 @@
 #ifndef VESC_ACKERMANN__ACKERMANN_TO_VESC_HPP_
 #define VESC_ACKERMANN__ACKERMANN_TO_VESC_HPP_
 
-#include <ackermann_msgs/msg/ackermann_drive_stamped.hpp>
+#include <ackermann_msgs/msg/ackermann_drive_stamped.h>
+#include <ackermann_msgs/msg/detail/ackermann_drive_stamped__struct.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <libserial/SerialPort.h>
 #include <std_msgs/msg/float64.hpp>
 
 namespace vesc_ackermann
@@ -58,6 +60,7 @@ private:
   rclcpp::Publisher<Float64>::SharedPtr erpm_pub_;
   rclcpp::Publisher<Float64>::SharedPtr servo_pub_;
   rclcpp::Subscription<AckermannDriveStamped>::SharedPtr ackermann_sub_;
+  LibSerial::SerialPort arduino_serial_;
 
   // ROS callbacks
   void ackermannCmdCallback(const AckermannDriveStamped::SharedPtr cmd);

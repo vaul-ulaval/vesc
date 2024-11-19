@@ -31,7 +31,7 @@
 #include "vesc_ackermann/ackermann_to_vesc.hpp"
 
 #include <cmath>
-#include <sstream>
+#include <rclcpp/logging.hpp>
 #include <string>
 
 #include <ackermann_msgs/msg/ackermann_drive_stamped.hpp>
@@ -47,6 +47,18 @@ using std_msgs::msg::Float64;
 AckermannToVesc::AckermannToVesc(const rclcpp::NodeOptions & options)
 : Node("ackermann_to_vesc_node", options)
 {
+    // Initialize the serial connection to the Arduino
+    try {
+      arduino_serial_.Open("/dev/arduino");
+      arduino_serial_.SetBaudRate(LibSerial::BaudRate::BAUD_115200);
+      arduino_serial_.SetCharacterSize(LibSerial::CharacterSize::CHAR_SIZE_8);
+      arduino_serial_.SetParity(LibSerial::Parity::PARITY_NONE);
+      arduino_serial_.SetStopBits(LibSerial::StopBits::STOP_BITS_1);
+      arduino_serial_.SetFlowControl(LibSerial::FlowControl::FLOW_CONTROL_NONE);
+    } catch (const LibSerial::OpenFailed&) {
+      RCLCPP_ERROR(this->get_logger(), "Failed to open serial port /dev/arduino");
+    }
+
   // get conversion parameters
   speed_to_erpm_gain_ = declare_parameter<double>("speed_to_erpm_gain");
   speed_to_erpm_offset_ = declare_parameter<double>("speed_to_erpm_offset");
@@ -78,6 +90,14 @@ void AckermannToVesc::ackermannCmdCallback(const AckermannDriveStamped::SharedPt
   if (rclcpp::ok()) {
     erpm_pub_->publish(erpm_msg);
     servo_pub_->publish(servo_msg);
+  }
+
+  // Send servo command to Arduino via serial
+  if (arduino_serial_.IsOpen()) {
+    std::string servo_command = std::to_string(servo_msg.data) + "\n";
+    arduino_serial_.Write(servo_command);
+  } else {
+    RCLCPP_ERROR(this->get_logger(), "Serial port /dev/arduino is not open.");
   }
 }
 

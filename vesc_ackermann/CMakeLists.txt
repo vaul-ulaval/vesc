@@ -11,6 +11,7 @@ elseif("${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT}" STREQUAL "98")
 endif()
 
 find_package(ament_cmake_auto REQUIRED)
+
 ament_auto_find_build_dependencies()
 
 ###########
@@ -32,6 +33,8 @@ rclcpp_components_register_node(${PROJECT_NAME}
   PLUGIN vesc_ackermann::VescToOdom
   EXECUTABLE vesc_to_odom_node
 )
+
+target_link_libraries(${PROJECT_NAME} /usr/lib/x86_64-linux-gnu/libserial.so)
 
 #############
 ## Testing ##

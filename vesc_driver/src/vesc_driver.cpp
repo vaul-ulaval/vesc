@@ -330,14 +330,15 @@ void VescDriver::positionCallback(const Float64::SharedPtr position)
  */
 void VescDriver::servoCallback(const Float64::SharedPtr servo)
 {
-  if (driver_mode_ == MODE_OPERATING) {
-    double servo_clipped(servo_limit_.clip(servo->data));
-    vesc_.setServo(servo_clipped);
-    // publish clipped servo value as a "sensor"
-    auto servo_sensor_msg = Float64();
-    servo_sensor_msg.data = servo_clipped;
-    servo_sensor_pub_->publish(servo_sensor_msg);
-  }
+  // Removed this callback because we control servo via arduino
+  // if (driver_mode_ == MODE_OPERATING) {
+  //   double servo_clipped(servo_limit_.clip(servo->data));
+  //   vesc_.setServo(servo_clipped);
+  //   // publish clipped servo value as a "sensor"
+  //   auto servo_sensor_msg = Float64();
+  //   servo_sensor_msg.data = servo_clipped;
+  //   servo_sensor_pub_->publish(servo_sensor_msg);
+  // }
 }
 
 VescDriver::CommandLimit::CommandLimit(
