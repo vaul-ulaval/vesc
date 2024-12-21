@@ -34,6 +34,8 @@
 #include <string>
 
 #include <geometry_msgs/msg/transform_stamped.hpp>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/utils.h>
 #include <vesc_msgs/msg/vesc_state_stamped.hpp>
 
 namespace vesc_ackermann
@@ -89,7 +91,19 @@ VescToOdom::VescToOdom(const rclcpp::NodeOptions & options)
     servo_sub_ = create_subscription<Float64>(
       "commands/servo/position", 10, std::bind(&VescToOdom::servoCmdCallback, this, _1));
   }
+
+  icp_odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("icp_odom", 10, std::bind(&VescToOdom::icpOdomCallback, this,
+                                                                                              std::placeholders::_1));
 }
+
+void VescToOdom::icpOdomCallback(const nav_msgs::msg::Odometry& msg) {
+  x_ = msg.pose.pose.position.x;
+  y_ = msg.pose.pose.position.y;
+  tf2::Quaternion q(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w);
+  yaw_ = tf2::getYaw(q);
+  last_state_->header.stamp = msg.header.stamp;
+}
+
 
 void VescToOdom::vescStateCallback(const VescStateStamped::SharedPtr state)
 {

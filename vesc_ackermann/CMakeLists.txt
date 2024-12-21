@@ -11,6 +11,8 @@ elseif("${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT}" STREQUAL "98")
 endif()
 
 find_package(ament_cmake_auto REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 ament_auto_find_build_dependencies()
 
@@ -35,6 +37,10 @@ rclcpp_components_register_node(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} /usr/lib/x86_64-linux-gnu/libserial.so)
+ament_target_dependencies(${PROJECT_NAME} 
+  tf2
+  tf2_geometry_msgs
+)
 
 #############
 ## Testing ##

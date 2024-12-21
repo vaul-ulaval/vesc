@@ -31,6 +31,7 @@
 #ifndef VESC_ACKERMANN__VESC_TO_ODOM_HPP_
 #define VESC_ACKERMANN__VESC_TO_ODOM_HPP_
 
+#include <nav_msgs/msg/detail/odometry__struct.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 
 #include <memory>
@@ -74,9 +75,11 @@ private:
   rclcpp::Publisher<Odometry>::SharedPtr odom_pub_;
   rclcpp::Subscription<VescStateStamped>::SharedPtr vesc_state_sub_;
   rclcpp::Subscription<Float64>::SharedPtr servo_sub_;
+  rclcpp::Subscription<Odometry>::SharedPtr icp_odom_sub_;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_pub_;
 
   // ROS callbacks
+  void icpOdomCallback(const nav_msgs::msg::Odometry& msg);
   void vescStateCallback(const VescStateStamped::SharedPtr state);
   void servoCmdCallback(const Float64::SharedPtr servo);
 };
