@@ -22,21 +22,15 @@ ament_auto_find_build_dependencies()
 
 # nodes library
 ament_auto_add_library(${PROJECT_NAME} SHARED
-  src/ackermann_to_vesc.cpp
   src/vesc_to_odom.cpp
 )
 
 # register nodes as components
 rclcpp_components_register_node(${PROJECT_NAME}
-  PLUGIN vesc_ackermann::AckermannToVesc
-  EXECUTABLE ackermann_to_vesc_node
-)
-rclcpp_components_register_node(${PROJECT_NAME}
   PLUGIN vesc_ackermann::VescToOdom
   EXECUTABLE vesc_to_odom_node
 )
 
-target_link_libraries(${PROJECT_NAME} /usr/lib/x86_64-linux-gnu/libserial.so)
 ament_target_dependencies(${PROJECT_NAME} 
   tf2
   tf2_geometry_msgs
