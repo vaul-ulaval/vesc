@@ -64,6 +64,7 @@ VescToOdom::VescToOdom(const rclcpp::NodeOptions & options)
 
   speed_to_erpm_gain_ = declare_parameter<double>("speed_to_erpm_gain");
   speed_to_erpm_offset_ = declare_parameter<double>("speed_to_erpm_offset");
+  yaw_dampening_ = declare_parameter<double>("yaw_dampening");
 
   if (use_servo_cmd_) {
     steering_to_servo_gain_ =
@@ -140,7 +141,7 @@ void VescToOdom::vescStateCallback(const VescStateStamped::SharedPtr state)
   x_ += x_dot * dt.seconds();
   y_ += y_dot * dt.seconds();
   if (use_servo_cmd_) {
-    yaw_ += current_angular_velocity * dt.seconds();
+    yaw_ += yaw_dampening_ * current_angular_velocity * dt.seconds();
   }
 
   // save state for next time

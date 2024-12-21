@@ -63,6 +63,7 @@ private:
   // conversion gain and offset
   double speed_to_erpm_gain_, speed_to_erpm_offset_;
   double steering_to_servo_gain_, steering_to_servo_offset_;
+  double yaw_dampening_;
   double wheelbase_;
   bool publish_tf_;
 
